@@ -39,7 +39,7 @@ const NetController = {
 			// счетчик неудачных подключений сбрасывается
 			this.closeConnectionCount = 0;
 
-			this.onConnectCb(e);
+			this.onConnectCb && this.onConnectCb(e);
 		};
 
 		ws.onclose = e => {
@@ -48,7 +48,7 @@ const NetController = {
 			// увеличиваем счетчик неудачных подключений
 			this.closeConnectionCount++;
 
-			this.onDisconnectCb(e)
+			this.onDisconnectCb && this.onDisconnectCb(e)
 		};
 
 		ws.onerror = e => {
@@ -58,8 +58,8 @@ const NetController = {
 		};
 
 		ws.onmessage = message => {
-			console.info('[MESSAGE RECEIVED]', message.data);
-			this.onMessageCb(JSON.parse(message.data))
+			console.trace('[MESSAGE RECEIVED]', message.data);
+			this.onMessageCb && this.onMessageCb(JSON.parse(message.data))
 		};
 
 		this.webSocket = ws;

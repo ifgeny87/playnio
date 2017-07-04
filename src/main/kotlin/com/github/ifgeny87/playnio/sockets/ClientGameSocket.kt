@@ -23,7 +23,7 @@ class ClientGameSocket(val gameController: GameController) : WebSocket.OnTextMes
 	private var connection: WebSocket.Connection? = null
 
 	// каждый клиент это игрок
-	val player = Player(UUID.randomUUID().toString())
+	val player = Player()
 
 	/**
 	 * Обработка события нового соединения с клиентом

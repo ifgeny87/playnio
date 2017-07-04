@@ -1,9 +1,8 @@
 package com.github.ifgeny87.playnio.controllers
 
-import com.beust.klaxon.JsonArray
-import com.beust.klaxon.JsonObject
-import com.beust.klaxon.json
-import com.beust.klaxon.obj
+import com.beust.klaxon.*
+import com.github.ifgeny87.common.distance
+import com.github.ifgeny87.playnio.actors.RainBall
 import com.github.ifgeny87.playnio.sockets.ClientGameSocket
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -13,13 +12,21 @@ class GameController : Runnable {
 	val webSockets = CopyOnWriteArraySet<ClientGameSocket>()
 
 	// время старта сервера
-	val serverStartTime = System.nanoTime()
+	val serverStartTime = System.nanoTime() / 1_000_000.0
 
 	// время сервера
-	var serverLastTime = System.nanoTime()
+	var serverLastTime = serverStartTime
 
 	// время прошло со старта
-	var serverTimeLength = 0L
+	var serverTimeLength = 0.0
+
+	// падающие мячи
+	val balls = ArrayList<RainBall>()
+
+	init {
+		for (i in 0..9)
+			balls.add(RainBall())
+	}
 
 	/**
 	 * Новый клиент подключился
@@ -52,12 +59,35 @@ class GameController : Runnable {
 	fun onClientMessage(client: ClientGameSocket, jsonObject: JsonObject) {
 		// проверяю, что пришло
 		val playerInfo = jsonObject.obj("player")
-		if (playerInfo != null) {
-			// обновлю данные игрока
-			client.player.updateFromClient(playerInfo)
 
-			// обновляю мир у клиентов
-			sendWorldToAllClients(client.player.toJsonObject())
+		playerInfo?.let {
+			if (playerInfo.string("action") == "click") {
+				// от клиента пришла информация о щелчке мыши
+				// определяем координаты мыши на поле
+				val px = playerInfo.int("x")!! * 1.0
+				val py = playerInfo.int("y")!! * 1.0
+
+				// поиск мяча под прицелом
+				val ballUnderAttack = balls.firstOrNull { distance(it.x, it.y, px, py) < 20 }
+
+				// если нашелся хоть один мяч, то надо обработать выстрел
+				ballUnderAttack?.let {
+					// игрок заработал еще одно очко
+					client.player.score++
+
+					// обновляем мяч
+					ballUnderAttack.reset()
+
+					// повышаю скорость падения мяча
+					ballUnderAttack.moveSpeed *= 1.5
+
+					// отправляем обновленный мир
+					sendWorldToAllClients(JsonArray<Any>(
+							ballUnderAttack.toJsonObject(),
+							client.player.toJsonObject()
+					))
+				}
+			}
 		}
 	}
 
@@ -73,9 +103,10 @@ class GameController : Runnable {
 	/**
 	 * Генерирует json состояние всех объектов мира
 	 */
-	fun worldToJsonArray() : JsonArray<Any> {
+	fun worldToJsonArray(): JsonArray<Any> {
 		val world = JsonArray<Any>()
 		webSockets.forEach { world.add(it.player.toJsonObject()) }
+		balls.forEach { world.add(it.toJsonObject()) }
 		return world
 	}
 
@@ -108,15 +139,32 @@ class GameController : Runnable {
 	 * Сам процесс игры
 	 */
 	override fun run() {
-		val me = Thread.currentThread();
+		val me = Thread.currentThread()
 
 		while (!me.isInterrupted) {
 			// расчет времени
-			val delta = (System.nanoTime() - serverLastTime) / 1_000_000.0
-			serverLastTime = System.nanoTime()
+			val now = System.nanoTime() / 1_000_000.0
+			val delta = (now - serverLastTime)
+			serverLastTime = now
+			serverTimeLength = now - serverStartTime
 
 			// для каждого клиента пересчитываю координаты
 			webSockets.forEach { it.player.update(delta) }
+
+			val updateBalls = ArrayList<RainBall>()
+
+			// также пересчитываю мячи
+			balls.forEach {
+				it.update(delta)
+				if (it.y > 420) {
+					it.reset()
+					updateBalls.add(it)
+				}
+			}
+
+			if (updateBalls.size > 0)
+				sendWorldToAllClients(
+						JsonArray<Any>(updateBalls.map { it.toJsonObject() }))
 
 			// надо поспать чтобы не вешать сервер
 			Thread.sleep(10)

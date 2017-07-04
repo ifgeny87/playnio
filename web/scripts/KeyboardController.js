@@ -36,6 +36,8 @@ const KeyboardController = {
 	init(onKeyDownCb, onKeyUpCb) {
 		this.onKeyDownCb = onKeyDownCb;
 		this.onKeyUpCb = onKeyUpCb;
+
+		// подпишемся на события клавиатуры документа
 		document.onkeydown = this.onKeyDown.bind(this);
 		document.onkeyup = this.onKeyUp.bind(this);
 
@@ -59,7 +61,7 @@ const KeyboardController = {
 		// проверка уже нажатых
 		if(!this.keyPressed[keyCode]) {
 			this.keyPressed[keyCode] = true;
-			this.onKeyDownCb(keyCode)
+			this.onKeyDownCb && this.onKeyDownCb(keyCode)
 		}
 
 		return false
@@ -80,7 +82,7 @@ const KeyboardController = {
 		// проверка уже нажатых
 		if(this.keyPressed[keyCode]) {
 			delete this.keyPressed[keyCode];
-			this.onKeyUpCb(keyCode)
+			this.onKeyUpCb && this.onKeyUpCb(keyCode)
 		}
 
 		return false

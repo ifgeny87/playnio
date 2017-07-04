@@ -1,12 +1,14 @@
 /**
- * Графический контроллер CanvasController следит за перерисовкой страницы.
+ * Графический контроллер GraphicsController следит за перерисовкой страницы.
  *
  * Будет оповещать игровой контроллер о том, когда браузер соберется выполнять перерисовку окна. Это очень удобно,
  * потому что в этом случае браузер будет экономить ресурсы на отрисовку.
  */
-const CanvasController = {
+const GraphicsController = {
 
 	drawRequestId: null,    // номер подписки на эвент
+
+	images: {},             // картинки
 
 	// информация о времени
 	time: {
@@ -35,12 +37,18 @@ const CanvasController = {
 	/**
 	 * Инициализация контроллера
 	 */
-	init: function (onUpdateCb) {
+	init(onUpdateCb) {
 		this.onUpdateCb = onUpdateCb;
 
 		// запоминаю канву и контекст
 		this.graph.canvas = document.getElementById('canvas');
 		this.graph.ctx = this.graph.canvas.getContext('2d');
+
+		// управление сглаживанием графики
+		// this.graph.ctx.imageSmoothingEnabled = false;
+		// this.graph.ctx.mozImageSmoothingEnabled = false;
+		// this.graph.ctx.webkitImageSmoothingEnabled = false;
+		// this.graph.ctx.msImageSmoothingEnabled = false;
 
 		// подпишусь на событие перерисовки браузера
 		this.drawRequestId = requestAnimationFrame(() => this.nextstep());
@@ -49,7 +57,7 @@ const CanvasController = {
 	/**
 	 * Выполняется обновление комнаты и перерисовка объектов
 	 */
-	nextstep: function () {
+	nextstep() {
 		// пересчет времени
 		this.time.last = this.time.now;
 		this.time.now = performance.now();
@@ -63,5 +71,16 @@ const CanvasController = {
 
 		// подпишусь на событие перерисовки браузера
 		this.drawRequestId = requestAnimationFrame(() => this.nextstep());
-	}
+	},
+
+	/**
+	 * Загрузка картинок
+	 * @param key - номер картинки, ее ключ в общей куче
+	 * @param src - путь до картинки
+	 */
+	loadImage(key, src) {
+		const image = new Image();
+		image.src = src;
+		this.images[key] = image;
+	},
 };

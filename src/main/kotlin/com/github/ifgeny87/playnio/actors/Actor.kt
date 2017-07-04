@@ -1,30 +1,30 @@
 package com.github.ifgeny87.playnio.actors
 
 import com.beust.klaxon.JsonObject
+import com.beust.klaxon.json
+import java.util.*
 
 const val ANG = Math.PI / 180.0
 
 /**
- * Актер - простейший тип объекта мира
+ * Актер - базовый объект мира
  */
 abstract class Actor {
 
+	val id = UUID.randomUUID().toString()
+
 	var x: Double = .0
-		get protected set;
 
 	var y: Double = .0
-		get protected set;
 
-	var direction: Int = 0
-		get protected set;
+	var direction: Double = .0
 
 	var moveSpeed: Double = .0
-		get protected set;
 
 	/**
-	 * Обновиление игрока на сервере
+	 * Обновление актера на сервере
 	 */
-	fun update(delta: Double) {
+	open fun update(delta: Double) {
 		if (moveSpeed != .0) {
 			val dx = Math.cos(ANG * direction) * moveSpeed * delta
 			val dy = Math.sin(ANG * direction) * moveSpeed * delta
@@ -34,7 +34,18 @@ abstract class Actor {
 	}
 
 	/**
-	 * Обновление состояния игрока от клиента
+	 * Возвращает json статус актера
 	 */
-	abstract fun updateFromClient(playerInfo: JsonObject)
+	open fun toJsonObject(): JsonObject {
+		val clzName = this.javaClass.simpleName
+		return json {
+			obj("type" to clzName,
+					"id" to id,
+					"x" to x,
+					"y" to y,
+					"direction" to direction,
+					"moveSpeed" to moveSpeed
+			)
+		}
+	}
 }
