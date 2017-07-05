@@ -6,8 +6,7 @@ html, body, #content {
 }
 
 #canvas {
-	width: 600px;
-	height: 400px;
 	display: inline-block;
 	background: silver;
+	cursor: move;
 }

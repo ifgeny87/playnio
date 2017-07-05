@@ -8,8 +8,6 @@ const GraphicsController = {
 
 	drawRequestId: null,    // номер подписки на эвент
 
-	images: {},             // картинки
-
 	// информация о времени
 	time: {
 		start: performance.now(),   // время начала, мс
@@ -44,43 +42,35 @@ const GraphicsController = {
 		this.graph.canvas = document.getElementById('canvas');
 		this.graph.ctx = this.graph.canvas.getContext('2d');
 
-		// управление сглаживанием графики
-		// this.graph.ctx.imageSmoothingEnabled = false;
-		// this.graph.ctx.mozImageSmoothingEnabled = false;
-		// this.graph.ctx.webkitImageSmoothingEnabled = false;
-		// this.graph.ctx.msImageSmoothingEnabled = false;
-
 		// подпишусь на событие перерисовки браузера
-		this.drawRequestId = requestAnimationFrame(() => this.nextstep());
+		this.drawRequestId = requestAnimationFrame(() => this.tick());
+	},
+
+	/**
+	 * Управление сглаживанием графики
+	 * @param flag
+	 */
+	setSmooth(flag) {
+		this.graph.ctx.imageSmoothingEnabled = flag;
+		this.graph.ctx.mozImageSmoothingEnabled = flag;
+		this.graph.ctx.webkitImageSmoothingEnabled = flag;
+		this.graph.ctx.msImageSmoothingEnabled = flag;
 	},
 
 	/**
 	 * Выполняется обновление комнаты и перерисовка объектов
 	 */
-	nextstep() {
+	tick() {
 		// пересчет времени
 		this.time.last = this.time.now;
 		this.time.now = performance.now();
 		this.time.length = this.time.now - this.time.start;
 		this.time.delta = this.time.now - this.time.last;
 
-		const delta = this.time.delta;   // мс
-
 		// обновление
-		this.onUpdateCb(this.graph.ctx, delta);
+		this.onUpdateCb(this.graph.ctx, this.time.delta, this.time.length);
 
 		// подпишусь на событие перерисовки браузера
-		this.drawRequestId = requestAnimationFrame(() => this.nextstep());
-	},
-
-	/**
-	 * Загрузка картинок
-	 * @param key - номер картинки, ее ключ в общей куче
-	 * @param src - путь до картинки
-	 */
-	loadImage(key, src) {
-		const image = new Image();
-		image.src = src;
-		this.images[key] = image;
+		this.drawRequestId = requestAnimationFrame(() => this.tick());
 	},
 };

@@ -34,7 +34,7 @@ function RainBall() {
 		// выполняем поворот
 		rotate += rotateSpeed * delta;
 
-		const ballImage = GraphicsController.images['ball'];
+		const ballImage = ImageController.images['ball'];
 		const ballWidth = ballImage.width;
 		const ballHeight = ballImage.height;
 		const S2 = SIZE / 2;
@@ -43,7 +43,7 @@ function RainBall() {
 		ctx.save();
 		ctx.translate(x, y);
 		ctx.rotate(rotate);
-		ctx.drawImage(ballImage, 0, 0, ballWidth, ballHeight, -S2, -S2, SIZE, SIZE);
+		ImageController.drawImageCenter('ball', SIZE);
 		ctx.restore();
 	};
 }

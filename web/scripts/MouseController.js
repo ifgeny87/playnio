@@ -11,6 +11,8 @@ const MouseController = {
 	// позиция курсора
 	pos: {x: 0, y: 0, pageX: 0, pageY: 0, offsetX: 0, offsetY: 0},
 
+	mouseIsOnBoard: false,     // мышь находится на поле
+
 	// хендлеры событий
 	onMouseEventCb: null,
 	onMouseMoveCb: null,
@@ -55,6 +57,13 @@ const MouseController = {
 		this.buttons.right = !!(e.buttons & 2);
 		this.buttons.middle = !!(e.buttons & 4);
 		let type = e.type;
+
+		if(type === 'mouseover')
+			this.mouseIsOnBoard = true;
+
+		if(type === 'mouseout')
+			this.mouseIsOnBoard = false;
+
 		// вызываем callback
 		this.onMouseEventCb && this.onMouseEventCb(type, this.buttons);
 	},
