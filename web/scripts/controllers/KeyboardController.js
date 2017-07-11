@@ -1,4 +1,4 @@
-/**
+1/**
  * Контроллер манипулятора типа клавиатура KeyboardController следит за нажатием кнопок в окне браузера.
  *
  * Контроллер ловит только кнопки из списка availKeys, все остальные кнопки пропускает.
@@ -7,33 +7,17 @@
  * отжата. Контроллер KeyboardController нужен для фильтрации событий. Игровой контроллер будет оповещен только об
  * одном зажатии и отжатии одной кнопки.
  */
-const KeyboardController = {
 
-	// кода кнопок
-	KEY_ENTER: 13,
-	KEY_ESCAPE: 27,
-	KEY_SPACE: 32,
-	KEY_LEFT: 37,
-	KEY_UP: 38,
-	KEY_RIGHT: 39,
-	KEY_DOWN: 40,
+define(['const/Keys'], Keys => KeyboardController = {
 
-	// список разрешенных кнопок
-	availKeys: [],
+	init(onKeyDownCb = null, onKeyUpCb = null, availKeys = null) {
+		// список разрешенных кнопок
+		this.availKeys = [];
 
-	// список зажатых кнопок
-	keyPressed: {},
+		// список зажатых кнопок
+		this.keyPressed = {};
 
-	// хендлеры на зажатие и отжатие кнопки
-	onKeyDownCb: null,
-	onKeyUpCb: null,
-
-	/**
-	 * Инициализация
-	 * @param onKeyDownCb - хендлер на нажатую кнопку
-	 * @param onKeyUpCb - хендлер на отжатую кнопку
-	 */
-	init(onKeyDownCb, onKeyUpCb) {
+		// хендлеры на зажатие и отжатие кнопки
 		this.onKeyDownCb = onKeyDownCb;
 		this.onKeyUpCb = onKeyUpCb;
 
@@ -41,9 +25,10 @@ const KeyboardController = {
 		document.onkeydown = this.onKeyDown.bind(this);
 		document.onkeyup = this.onKeyUp.bind(this);
 
-		// доступные кнопки
-		this.availKeys = [this.KEY_ENTER, this.KEY_ESCAPE, this.KEY_SPACE,
-			this.KEY_LEFT, this.KEY_UP, this.KEY_RIGHT, this.KEY_DOWN];
+		// кнопки, которые будут обработаны
+		this.availKeys = availKeys ||
+			// список кнопок по умолчанию
+			[Keys.ENTER, Keys.ESCAPE, Keys.SPACE, Keys.LEFT, Keys.UP, Keys.RIGHT, Keys.DOWN, Keys.F9];
 	},
 
 	/**
@@ -59,7 +44,7 @@ const KeyboardController = {
 			return true;
 
 		// проверка уже нажатых
-		if(!this.keyPressed[keyCode]) {
+		if (!this.keyPressed[keyCode]) {
 			this.keyPressed[keyCode] = true;
 			this.onKeyDownCb && this.onKeyDownCb(keyCode)
 		}
@@ -80,11 +65,11 @@ const KeyboardController = {
 			return true;
 
 		// проверка уже нажатых
-		if(this.keyPressed[keyCode]) {
+		if (this.keyPressed[keyCode]) {
 			delete this.keyPressed[keyCode];
 			this.onKeyUpCb && this.onKeyUpCb(keyCode)
 		}
 
 		return false
 	}
-};
+});
