@@ -1,11 +1,11 @@
 /**
  * Класс Игрока.
  */
-define(['actors/GameActor'], GameActor => class Robot extends GameActor {
-	constructor(x = 0, y = 0, z = 0) {
-		super('coren', x, y, z, 40, 40, 1.7, 200);
+define(['actors/GameActor'], GameActor => class Player extends GameActor {
+	constructor(id, x = 0, y = 0, z = 0) {
+		super(id, 'coren', x, y, z, 40, 40, 1.7, 200)
 
-		this.score = 0;
+		this.score = 0
 	}
 
 	/**
@@ -13,8 +13,10 @@ define(['actors/GameActor'], GameActor => class Robot extends GameActor {
 	 * @param json
 	 */
 	updateFromJson(json) {
-		this.score = json.score;
-		this.x = json.x;
-		this.y = json.y;
-	};
-});
+		this.score = json.score
+		this.x = json.x
+		this.y = json.y
+		this.direction = json.direction
+		this.moveSpeed = json.moveSpeed
+	}
+})

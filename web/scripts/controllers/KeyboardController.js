@@ -1,4 +1,4 @@
-1/**
+/**
  * Контроллер манипулятора типа клавиатура KeyboardController следит за нажатием кнопок в окне браузера.
  *
  * Контроллер ловит только кнопки из списка availKeys, все остальные кнопки пропускает.
@@ -12,23 +12,27 @@ define(['const/Keys'], Keys => KeyboardController = {
 
 	init(onKeyDownCb = null, onKeyUpCb = null, availKeys = null) {
 		// список разрешенных кнопок
-		this.availKeys = [];
+		this.availKeys = []
 
 		// список зажатых кнопок
-		this.keyPressed = {};
+		this.keyPressed = {}
 
 		// хендлеры на зажатие и отжатие кнопки
-		this.onKeyDownCb = onKeyDownCb;
-		this.onKeyUpCb = onKeyUpCb;
+		this.onKeyDownCb = onKeyDownCb
+		this.onKeyUpCb = onKeyUpCb
 
 		// подпишемся на события клавиатуры документа
-		document.onkeydown = this.onKeyDown.bind(this);
-		document.onkeyup = this.onKeyUp.bind(this);
+		document.onkeydown = this.onKeyDown.bind(this)
+		document.onkeyup = this.onKeyUp.bind(this)
 
 		// кнопки, которые будут обработаны
 		this.availKeys = availKeys ||
-			// список кнопок по умолчанию
-			[Keys.ENTER, Keys.ESCAPE, Keys.SPACE, Keys.LEFT, Keys.UP, Keys.RIGHT, Keys.DOWN, Keys.F9];
+			// список кнопок, которые будут обработаны контроллером
+			[
+				Keys.ENTER, Keys.ESCAPE, Keys.SPACE,        // сревисные кнопки
+				Keys.LEFT, Keys.UP, Keys.RIGHT, Keys.DOWN,  // стрелки
+				Keys.F9                                     // функциональные кнопки
+			]
 	},
 
 	/**
@@ -37,18 +41,22 @@ define(['const/Keys'], Keys => KeyboardController = {
 	 * @returns {boolean}
 	 */
 	onKeyDown(e) {
-		let keyCode = e.keyCode;
+		let keyCode = e.keyCode
 
 		// проверка доступных клавиш
-		if (this.availKeys.indexOf(keyCode) === -1)
-			return true;
+		if (this.availKeys.indexOf(keyCode) === null)
+		// кнопка не найдена среди доступных, кнопка не бужет обработана
+			return true
 
 		// проверка уже нажатых
 		if (!this.keyPressed[keyCode]) {
-			this.keyPressed[keyCode] = true;
-			this.onKeyDownCb && this.onKeyDownCb(keyCode)
+			// запоминаем кнопку в списке нажатых кнопок
+			this.keyPressed[keyCode] = true
+			if (this.onKeyDownCb)
+				return this.onKeyDownCb(keyCode)
 		}
 
+		// по умолчанию кнопка была обработана и не передается дальше
 		return false
 	},
 
@@ -58,18 +66,22 @@ define(['const/Keys'], Keys => KeyboardController = {
 	 * @returns {boolean}
 	 */
 	onKeyUp(e) {
-		let keyCode = e.keyCode;
+		let keyCode = e.keyCode
 
 		// проверка доступных клавиш
 		if (this.availKeys.indexOf(keyCode) === null)
-			return true;
+		// кнопка не найдена среди доступных, кнопка не бужет обработана
+			return true
 
 		// проверка уже нажатых
 		if (this.keyPressed[keyCode]) {
-			delete this.keyPressed[keyCode];
-			this.onKeyUpCb && this.onKeyUpCb(keyCode)
+			// удаляем кнопку из списка нажатых кнопок
+			delete this.keyPressed[keyCode]
+			if (this.onKeyUpCb)
+				return this.onKeyUpCb(keyCode)
 		}
 
+		// по умолчанию кнопка была использована и не передается дальше
 		return false
 	}
-});
+})

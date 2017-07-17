@@ -4,7 +4,7 @@
  * Контроллер будет оповещать игровой контроллер о всех событиях сети, а также предоставляет метод для отправки
  * сообщения серверу.
  */
-const NetController = {
+define(() => NetController = {
 
 	// объект сокета
 	webSocket: null,
@@ -19,50 +19,50 @@ const NetController = {
 	 * Инициализация контроллера
 	 */
 	init: function (onConnectCb, onDisconnectCb, onErrorCb, onMessageCb) {
-		this.onConnectCb = onConnectCb;
-		this.onDisconnectCb = onDisconnectCb;
-		this.onErrorCb = onErrorCb;
-		this.onMessageCb = onMessageCb;
+		this.onConnectCb = onConnectCb
+		this.onDisconnectCb = onDisconnectCb
+		this.onErrorCb = onErrorCb
+		this.onMessageCb = onMessageCb
 
-		this.createConnection();
+		this.createConnection()
 	},
 
 	/**
 	 * Создание соединения
 	 */
 	createConnection: function () {
-		let ws = new WebSocket('ws://localhost:3333');
+		let ws = new WebSocket('ws://localhost:3333')
 
 		ws.onopen = e => {
-			console.info('[OPEN CONNECTION]', arguments);
+			console.info('[Connection Opened]', arguments)
 
 			// счетчик неудачных подключений сбрасывается
-			this.closeConnectionCount = 0;
+			this.closeConnectionCount = 0
 
-			this.onConnectCb && this.onConnectCb(e);
-		};
+			this.onConnectCb && this.onConnectCb(e)
+		}
 
 		ws.onclose = e => {
-			console.warn('[CLOSE CONNECTION]', arguments);
+			console.warn('[Connection Closed]', arguments)
 
 			// увеличиваем счетчик неудачных подключений
-			this.closeConnectionCount++;
+			this.closeConnectionCount++
 
 			this.onDisconnectCb && this.onDisconnectCb(e)
-		};
+		}
 
 		ws.onerror = e => {
-			console.error('[ERROR CONNECTION]', arguments);
+			console.error('[Connection Error]', arguments)
 
-			this.onErrorCb(e);
-		};
+			this.onErrorCb(e)
+		}
 
 		ws.onmessage = message => {
-			console.trace('[MESSAGE RECEIVED]', message.data);
+			console.trace('[Received Message]', message.data)
 			this.onMessageCb && this.onMessageCb(JSON.parse(message.data))
-		};
+		}
 
-		this.webSocket = ws;
+		this.webSocket = ws
 	},
 
 	/**
@@ -70,6 +70,6 @@ const NetController = {
 	 * @param obj
 	 */
 	sendMessage(obj) {
-		this.webSocket.send(JSON.stringify(obj));
+		this.webSocket.send(JSON.stringify(obj))
 	}
-};
+})

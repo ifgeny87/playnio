@@ -17,4 +17,4 @@ requirejs.config({
 	paths: {}
 });
 
-require(['controllers/GameController'], GameCtronerller => new GameCtronerller);
+require(['controllers/GameController'], GameCtronerller => new GameCtronerller());

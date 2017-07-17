@@ -6,10 +6,11 @@
  */
 define(() => GraphicsController = {
 
-	init(onUpdateCb = null, onDrawCb = null) {
+	init(onUpdateCb = null, onDrawCb = null, onPostDrawCb = null) {
 		// хендлеры
-		this.onUpdateCb = onUpdateCb;
-		this.onDrawCb = onDrawCb;
+		this.onUpdateCb = onUpdateCb
+		this.onDrawCb = onDrawCb
+		this.onPostDrawCb = onPostDrawCb
 
 		// информация о времени
 		this.time = {
@@ -18,43 +19,43 @@ define(() => GraphicsController = {
 			now: null,          // текущее время обработки, с
 			length: .0,         // сколько всего прошло от начала, с
 			delta: .0           // дельта времени (now-last), с
-		};
+		}
 
 		// статистика
 		this.stats = {
 			fps: .0,            // расчетная велинича fps
 			delta10: .0,        // fps будет считаться мягко - за последние 10 кадров
 			frameTimes: 0       // колво отрисованных кадров
-		};
+		}
 
 		// хранилище картинок
-		this.images = {};
+		this.images = {}
 
 		// хранилище тайлов
-		this.tileImages = {};
+		this.tileImages = {}
 
 		// стиль рендера
 		// определяется как набор бит
-		this.renderStyle = 1;
+		this.renderStyle = 1
 
 		// возможные стили рендера
-		this.DRAW_IMAGE_STYLE =         0b000001;
-		this.SPRITE_POSITION_STYLE =    0b000010;
-		this.DRAW_FRAME_STYLE =         0b000100;
+		this.DRAW_IMAGE_STYLE = 0b000001
+		this.SPRITE_POSITION_STYLE = 0b000010
+		this.DRAW_FRAME_STYLE = 0b000100
 
 		// хранилище анимированных спрайтов
-		this.animatedSprites = {};
+		this.animatedSprites = {}
 
 		// запоминаю канву и контекст
-		this.canvas = document.getElementById('canvas');    // канва
-		this.ctx = this.canvas.getContext('2d');    // ссылка на графический контекст
+		this.canvas = document.getElementById('canvas')    // канва
+		this.ctx = this.canvas.getContext('2d')    // ссылка на графический контекст
 
 		// подпишусь на событие перерисовки браузера
-		this.drawRequestId = requestAnimationFrame(() => this.tick());
+		this.drawRequestId = requestAnimationFrame(() => this.tick())
 
 		// бинд методов
-		this.setSmooth.bind(this);
-		this.tick.bind(this);
+		this.setSmooth.bind(this)
+		this.tick.bind(this)
 	},
 
 	/**
@@ -62,10 +63,10 @@ define(() => GraphicsController = {
 	 * @param flag
 	 */
 	setSmooth(flag) {
-		this.ctx.imageSmoothingEnabled = flag;
-		this.ctx.mozImageSmoothingEnabled = flag;
-		this.ctx.webkitImageSmoothingEnabled = flag;
-		this.ctx.msImageSmoothingEnabled = flag;
+		this.ctx.imageSmoothingEnabled = flag
+		this.ctx.mozImageSmoothingEnabled = flag
+		this.ctx.webkitImageSmoothingEnabled = flag
+		this.ctx.msImageSmoothingEnabled = flag
 	},
 
 	/**
@@ -73,30 +74,33 @@ define(() => GraphicsController = {
 	 */
 	tick() {
 		// пересчет времени
-		this.time.last = this.time.now;
-		this.time.now = performance.now() / 1000;
-		this.time.length = this.time.now - this.time.start;
-		this.time.delta = this.time.now - this.time.last;
+		this.time.last = this.time.now
+		this.time.now = performance.now() / 1000
+		this.time.length = this.time.now - this.time.start
+		this.time.delta = this.time.now - this.time.last
 
 		// fps считаем мягко
-		this.stats.delta10 = this.stats.delta10 * .9 + this.time.delta;
-		this.stats.fps = 10 / this.stats.delta10;
-		++this.stats.frameTimes;
+		this.stats.delta10 = this.stats.delta10 * .9 + this.time.delta
+		this.stats.fps = 10 / this.stats.delta10
+		++this.stats.frameTimes
 
 		// обновление
-		this.onUpdateCb(this.time.delta);
+		this.onUpdateCb(this.time.delta)
 
 		// очистка слоев
-		this.graphicLayers = {};
+		this.graphicLayers = {}
 
 		// перерисовка
-		this.onDrawCb(this.ctx);
+		this.onDrawCb(this.ctx, this.canvas.width, this.canvas.height)
 
 		// отрисовка по слоям
-		this.drawLayers();
+		this.drawLayers()
+
+		// колнтроллер может провести отрисовку после отрисовки слоев
+		if (this.onPostDrawCb) this.onPostDrawCb(this.ctx, this.canvas.width, this.canvas.height)
 
 		// подпишусь на событие перерисовки браузера
-		this.drawRequestId = requestAnimationFrame(() => this.tick());
+		this.drawRequestId = requestAnimationFrame(() => this.tick())
 	},
 
 	/**
@@ -105,52 +109,52 @@ define(() => GraphicsController = {
 	 * @param src - путь до картинки
 	 */
 	loadImage(key, src) {
-		const image = new Image();
-		image.src = src;
+		const image = new Image()
+		image.src = src
 
 		this.images[key] = {
 			image,
 			width: null,    // пока картинка не загружена, определить размеры нельзя
 			height: null
-		};
+		}
 
 		// ждем пока загрузится картинка и лишь тогда запоминаем размеры картинки
 		image.onload = () => {
-			Object.assign(this.images[key], {width: image.width, height: image.height});
-		};
+			Object.assign(this.images[key], {width: image.width, height: image.height})
+		}
 
-		return image;
+		return image
 	},
 
 	loadTileImage(options) {
-		const o = Object.assign({frameWidth: 100, frameHeight: 100, left: 0, top: 0, right: 0, bottom: 0}, options);
+		const o = Object.assign({frameWidth: 100, frameHeight: 100, left: 0, top: 0, right: 0, bottom: 0}, options)
 
-		if (!o.src || !o.key) return console.error('Property key or src is not set.');
-		if (!o.frameWidth || o.frameWidth <= 0) return console.error('Property frameWidth is not set');
-		if (!o.frameHeight || o.framHeight <= 0) return console.error('Property frameHeight is not set');
+		if (!o.src || !o.key) return console.error('Property key or src is not set.')
+		if (!o.frameWidth || o.frameWidth <= 0) return console.error('Property frameWidth is not set')
+		if (!o.frameHeight || o.framHeight <= 0) return console.error('Property frameHeight is not set')
 
-		const image = this.loadImage(o.key, o.src);
+		const image = this.loadImage(o.key, o.src)
 
 		const tileFrame = {
 			image,
 			frames: [],
 			frameWidth: o.frameWidth - o.left - o.right,
 			frameHeight: o.frameHeight - o.top - o.bottom
-		};
+		}
 
 		image.onload = () => {
 			// когда картинка загрузится
 			// считаю для каждого кадра его размеры
-			const countX = Math.trunc(image.width / o.frameWidth);
-			const countY = Math.trunc(image.height / o.frameHeight);
-			let frames = [];
+			const countX = Math.trunc(image.width / o.frameWidth)
+			const countY = Math.trunc(image.height / o.frameHeight)
+			let frames = []
 			for (let j = 0; j < countY; j++)
 				for (let i = 0; i < countX; i++)
-					frames.push({x: i * o.frameWidth + o.left, y: j * o.frameHeight + o.top});
-			Object.assign(tileFrame, {frames});
-		};
+					frames.push({x: i * o.frameWidth + o.left, y: j * o.frameHeight + o.top})
+			Object.assign(tileFrame, {frames})
+		}
 
-		this.tileImages[o.key] = tileFrame;
+		this.tileImages[o.key] = tileFrame
 	},
 
 	/**
@@ -162,34 +166,34 @@ define(() => GraphicsController = {
 	 * @param height
 	 */
 	drawImage(key, x, y, width, height) {
-		const image = this.images[key];
+		const image = this.images[key]
 
-		if (!x) x = 0;
-		if (!y) y = 0;
+		if (!x) x = 0
+		if (!y) y = 0
 
 		if (!width) {
-			width = image.width;
-			height = image.height;
+			width = image.width
+			height = image.height
 		}
 		if (!height) {
-			height = width;
+			height = width
 		}
 
-		this.ctx.drawImage(image.image, 0, 0, image.width, image.height, x, y, width, height);
+		this.ctx.drawImage(image.image, 0, 0, image.width, image.height, x, y, width, height)
 	},
 
 	addToLayer(layer, cb) {
 		if (!this.graphicLayers[layer])
-			this.graphicLayers[layer] = [];
-		this.graphicLayers[layer].push(cb);
+			this.graphicLayers[layer] = []
+		this.graphicLayers[layer].push(cb)
 	},
 
 	drawLayers() {
-		let keys = Object.keys(this.graphicLayers).sort((a, b) => a > b);
-		for(let i in keys)
-			for(let key in this.graphicLayers[keys[i]]) {
-				let cb = this.graphicLayers[keys[i]][key];
-				cb(this.ctx);
+		let keys = Object.keys(this.graphicLayers).sort((a, b) => a > b)
+		for (let i in keys)
+			for (let key in this.graphicLayers[keys[i]]) {
+				let cb = this.graphicLayers[keys[i]][key]
+				cb(this.ctx)
 			}
 	},
 
@@ -200,38 +204,38 @@ define(() => GraphicsController = {
 	 * @param height
 	 */
 	drawImageCenter(key, width, height) {
-		const image = this.images[key];
+		const image = this.images[key]
 
 		if (!width) {
-			width = image.width;
-			height = image.height;
+			width = image.width
+			height = image.height
 		}
 		if (!height) {
-			height = width;
+			height = width
 		}
 
-		this.ctx.drawImage(image.image, 0, 0, image.width, image.height, -width / 2, -height / 2, width, height);
+		this.ctx.drawImage(image.image, 0, 0, image.width, image.height, -width / 2, -height / 2, width, height)
 	},
 
 	drawTileImage(key, index, x, y, width, height) {
-		const tileImage = this.tileImages[key];
+		const tileImage = this.tileImages[key]
 
-		const frame = tileImage.frames[index];
+		const frame = tileImage.frames[index]
 
-		if (!frame) return;
+		if (!frame) return
 
-		if (!x) x = 0;
-		if (!y) y = 0;
+		if (!x) x = 0
+		if (!y) y = 0
 
-		if (!width) width = tileImage.frameWidth;
-		if (!height) height = tileImage.frameHeight;
+		if (!width) width = tileImage.frameWidth
+		if (!height) height = tileImage.frameHeight
 
 		this.ctx.drawImage(this.images[key].image,
 			frame.x, frame.y, tileImage.frameWidth, tileImage.frameHeight,
-			x, y, width, height);
+			x, y, width, height)
 	},
 
 	initAnimatedSprite(options) {
-		this.animatedSprites[options.key] = options;
+		this.animatedSprites[options.key] = options
 	},
-});
+})

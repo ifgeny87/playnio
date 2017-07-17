@@ -1,6 +1,5 @@
 package com.github.ifgeny87.playnio
 
-import com.beust.klaxon.json
 import com.github.ifgeny87.playnio.controllers.GameController
 import com.github.ifgeny87.playnio.sockets.ClientGameSocket
 import org.eclipse.jetty.server.Server
@@ -28,8 +27,7 @@ fun main(args: Array<String>) {
 	Thread(gameController).start()
 }
 
-class ServerHandler(val gameController : GameController) : WebSocketHandler() {
-
+class ServerHandler(val gameController: GameController) : WebSocketHandler() {
 	// logger
 	private val log = LoggerFactory.getLogger(ServerHandler::class.java)
 

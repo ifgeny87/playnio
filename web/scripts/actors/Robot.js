@@ -4,17 +4,18 @@
 define(['actors/GameActor'], GameActor => class Robot extends GameActor {
 	/**
 	 * Роботы маленькие, поэтому будут рисоваться в масштабе .5
+	 * @param id
 	 * @param x
 	 * @param y
 	 * @param z
 	 */
-	constructor(x = 0, y = 0, z = 0) {
-		super('robot', x, y, z, 20, 20, .5, 100);
+	constructor(id, x = 0, y = 0, z = 0) {
+		super(id, 'robot', x, y, z, 20, 20, .5, 100)
 
-		this.spriteNormalY = this.sprite.y;
+		this.spriteNormalY = this.sprite.y
 
-		this.jumpDelta = 0;
-		this.jumpLength = 0;
+		this.jumpDelta = 0
+		this.jumpLength = 0
 	}
 
 	/**
@@ -25,21 +26,33 @@ define(['actors/GameActor'], GameActor => class Robot extends GameActor {
 		// если у робота задана скорость, то активируем его прыгучесть
 		if (this.speedX || this.speedY) {
 			if (this.jumpDelta === 0) {
-				this.jumpDelta += delta;
+				this.jumpDelta += delta
 				// вычисляем время, сколько робот будет находиться в полете
-				this.jumpLength = .2 + Math.random() * .3;    // 1 sec
+				this.jumpLength = .2 + Math.random() * .3    // 1 sec
 			}
 		}
 
 		if (this.jumpDelta > 0) {
-			this.jumpDelta += delta;
+			this.jumpDelta += delta
 			// пока робот движется, будем считать для него высоту прыжка по синусоиде
-			this.sprite.y = this.spriteNormalY + Math.sin(Math.PI / this.jumpLength * this.jumpDelta) * 15;
-			if(this.jumpDelta > this.jumpLength) {
-				this.jumpDelta = 0;
+			this.sprite.y = this.spriteNormalY + Math.sin(Math.PI / this.jumpLength * this.jumpDelta) * 15
+			if (this.jumpDelta > this.jumpLength) {
+				this.jumpDelta = 0
 			}
 		}
 
-		super.update(delta);
+		super.update(delta)
 	}
-});
+
+	/**
+	 * Обновление данных от сервера.
+	 * @param json
+	 */
+	updateFromJson(json) {
+		this.score = json.score
+		this.x = json.x
+		this.y = json.y
+		this.direction = json.direction
+		this.moveSpeed = json.moveSpeed
+	}
+})

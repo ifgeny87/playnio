@@ -26,26 +26,26 @@ const MouseController = {
 	 * @param onMouseWheelCb
 	 */
 	init(controlNode, onMouseEventCb, onMouseMoveCb, onMouseWheelCb) {
-		this.onMouseEventCb = onMouseEventCb;
-		this.onMouseMoveCb = onMouseMoveCb;
-		this.onMouseWheelCb = onMouseWheelCb;
+		this.onMouseEventCb = onMouseEventCb
+		this.onMouseMoveCb = onMouseMoveCb
+		this.onMouseWheelCb = onMouseWheelCb
 
 		// запрещаю правое меню
-		controlNode.oncontextmenu = () => false;
+		controlNode.oncontextmenu = () => false
 
 		// все события однотипны, поэтому биндю их на один метод
-		controlNode.onmousedown = this.onMouseEvent.bind(this);
-		controlNode.onmouseup = this.onMouseEvent.bind(this);
-		controlNode.onmouseover = this.onMouseEvent.bind(this);
-		controlNode.onmouseout = this.onMouseEvent.bind(this);
+		controlNode.onmousedown = this.onMouseEvent.bind(this)
+		controlNode.onmouseup = this.onMouseEvent.bind(this)
+		controlNode.onmouseover = this.onMouseEvent.bind(this)
+		controlNode.onmouseout = this.onMouseEvent.bind(this)
 
 		// move выполняется чаще, поэтому его не нужно так часто вызывать
-		controlNode.onmousemove = this.onMouseMove.bind(this);
+		controlNode.onmousemove = this.onMouseMove.bind(this)
 
 		// в разных браузерах - разные события колеса
-		controlNode.wheel = this.onMouseWheel.bind(this);
-		controlNode.onwheel = this.onMouseWheel.bind(this);
-		controlNode.onmousewheel = this.onMouseWheel.bind(this);
+		controlNode.wheel = this.onMouseWheel.bind(this)
+		controlNode.onwheel = this.onMouseWheel.bind(this)
+		controlNode.onmousewheel = this.onMouseWheel.bind(this)
 	},
 
 	/**
@@ -53,19 +53,19 @@ const MouseController = {
 	 * @param e
 	 */
 	onMouseEvent(e) {
-		this.buttons.left = !!(e.buttons & 1);
-		this.buttons.right = !!(e.buttons & 2);
-		this.buttons.middle = !!(e.buttons & 4);
-		let type = e.type;
+		this.buttons.left = !!(e.buttons & 1)
+		this.buttons.right = !!(e.buttons & 2)
+		this.buttons.middle = !!(e.buttons & 4)
+		let type = e.type
 
-		if(type === 'mouseover')
-			this.mouseIsOnBoard = true;
+		if (type === 'mouseover')
+			this.mouseIsOnBoard = true
 
-		if(type === 'mouseout')
-			this.mouseIsOnBoard = false;
+		if (type === 'mouseout')
+			this.mouseIsOnBoard = false
 
 		// вызываем callback
-		this.onMouseEventCb && this.onMouseEventCb(type, this.buttons);
+		this.onMouseEventCb && this.onMouseEventCb(type, this.buttons)
 	},
 
 	/**
@@ -78,9 +78,9 @@ const MouseController = {
 	 * @param offsetY
 	 */
 	onMouseMove({x, y, pageX, pageY, offsetX, offsetY}) {
-		this.pos = {x, y, pageX, pageY, offsetX, offsetY};
+		this.pos = {x, y, pageX, pageY, offsetX, offsetY}
 		// вызываем callback
-		this.onMouseMoveCb && this.onMouseMoveCb(this.pos);
+		this.onMouseMoveCb && this.onMouseMoveCb(this.pos)
 	},
 
 	/**
@@ -89,8 +89,8 @@ const MouseController = {
 	 * @returns {boolean}
 	 */
 	onMouseWheel(e) {
-		let delta = e.deltaY;
-		this.onMouseWheelCb && this.onMouseWheelCb(delta);
-		return false;
+		let delta = e.deltaY
+		this.onMouseWheelCb && this.onMouseWheelCb(delta)
+		return false
 	}
-};
+}

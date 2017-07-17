@@ -3,7 +3,7 @@ package com.github.ifgeny87.playnio.actors
 /**
  * Created in project playnio on 04.07.17
  */
-class RainBall : Actor() {
+class Robot : Actor() {
 
 	init {
 		reset()

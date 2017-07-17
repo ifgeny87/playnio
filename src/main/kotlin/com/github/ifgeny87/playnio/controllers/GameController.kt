@@ -2,7 +2,7 @@ package com.github.ifgeny87.playnio.controllers
 
 import com.beust.klaxon.*
 import com.github.ifgeny87.common.distance
-import com.github.ifgeny87.playnio.actors.RainBall
+import com.github.ifgeny87.playnio.actors.Robot
 import com.github.ifgeny87.playnio.sockets.ClientGameSocket
 import java.util.concurrent.CopyOnWriteArraySet
 
@@ -21,11 +21,11 @@ class GameController : Runnable {
 	var serverTimeLength = 0.0
 
 	// падающие мячи
-	val balls = ArrayList<RainBall>()
+	val robots = ArrayList<Robot>()
 
 	init {
-		for (i in 0..9)
-			balls.add(RainBall())
+		for (i in 0..0)
+			robots.add(Robot())
 	}
 
 	/**
@@ -68,7 +68,7 @@ class GameController : Runnable {
 				val py = playerInfo.int("y")!! * 1.0
 
 				// поиск мяча под прицелом
-				val ballUnderAttack = balls.firstOrNull { distance(it.x, it.y, px, py) < 20 }
+				val ballUnderAttack = robots.firstOrNull { distance(it.x, it.y, px, py) < 20 }
 
 				// если нашелся хоть один мяч, то надо обработать выстрел
 				ballUnderAttack?.let {
@@ -106,7 +106,7 @@ class GameController : Runnable {
 	fun worldToJsonArray(): JsonArray<Any> {
 		val world = JsonArray<Any>()
 		webSockets.forEach { world.add(it.player.toJsonObject()) }
-		balls.forEach { world.add(it.toJsonObject()) }
+		robots.forEach { world.add(it.toJsonObject()) }
 		return world
 	}
 
@@ -151,10 +151,10 @@ class GameController : Runnable {
 			// для каждого клиента пересчитываю координаты
 			webSockets.forEach { it.player.update(delta) }
 
-			val updateBalls = ArrayList<RainBall>()
+			val updateBalls = ArrayList<Robot>()
 
 			// также пересчитываю мячи
-			balls.forEach {
+			robots.forEach {
 				it.update(delta)
 				if (it.y > 420) {
 					it.reset()
